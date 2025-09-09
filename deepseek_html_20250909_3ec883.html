@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Notas Académicas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .app-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .controls {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: #4c6ef5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #3b5bdb;
+        }
+        
+        button.add {
+            background-color: #40c057;
+        }
+        
+        button.add:hover {
+            background-color: #2f9e44;
+        }
+        
+        button.delete {
+            background-color: #fa5252;
+        }
+        
+        button.delete:hover {
+            background-color: #e03131;
+        }
+        
+        .tabs {
+            display: flex;
+            background-color: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #495057;
+            transition: all 0.2s;
+        }
+        
+        .tab.active {
+            background-color: white;
+            color: #4c6ef5;
+            border-bottom: 3px solid #4c6ef5;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        th {
+            background-color: #f1f3f5;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .grade-cell {
+            width: 100px;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .summary {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .summary h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .final-grade {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4c6ef5;
+            margin-top: 10px;
+        }
+        
+        .notion-info {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .notion-info h3 {
+            color: #4c6ef5;
+            margin-bottom: 15px;
+        }
+        
+        .instructions {
+            text-align: left;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            .form-group {
+                width: 100%;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-book"></i> Gestor de Notas Académicas</h1>
+            <p class="subtitle">Organiza tus ramos, notas y ponderaciones</p>
+        </header>
+        
+        <div class="app-container">
+            <div class="controls">
+                <div class="form-group">
+                    <label for="course-name">Nombre del Ramo</label>
+                    <input type="text" id="course-name" placeholder="Ej: Matemáticas">
+                </div>
+                <div class="form-group">
+                    <label for="course-grade">Nota</label>
+                    <input type="number" id="course-grade" min="1" max="7" step="0.1" placeholder="1.0 - 7.0">
+                </div>
+                <div class="form-group">
+                    <label for="course-weight">Ponderación (%)</label>
+                    <input type="number" id="course-weight" min="1" max="100" placeholder="Ej: 30">
+                </div>
+                <div class="form-group">
+                    <label for="course-date">Fecha</label>
+                    <input type="date" id="course-date">
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button class="add" id="add-grade"><i class="fas fa-plus"></i> Agregar Nota</button>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="courses">Mis Ramos</div>
+                <div class="tab" data-tab="grades">Todas las Notas</div>
+                <div class="tab" data-tab="stats">Estadísticas</div>
+            </div>
+            
+            <div class="tab-content active" id="courses-content">
+                <h2>Resumen de Ramos</h2>
+                <table id="courses-table">
+                    <thead>
+                        <tr>
+                            <th>Ramo</th>
+                            <th>Nota Final</th>
+                            <th>Porcentaje Completo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se cargarán con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="tab-content" id="grades-content">
+                <h2>Todas las Notas</h2>
+                <table id="grades-table">
+                    <thead>
+                        <tr>
+                            <th>Ramo</th>
+                            <th>Nota</th>
+                            <th>Ponderación</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se cargarán con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="tab-content" id="stats-content">
+                <h2>Estadísticas y Promedios</h2>
+                <div class="summary">
+                    <h3>Resumen General</h3>
+                    <div class="summary-item">
+                        <span>Promedio General:</span>
+                        <span class="final-grade">5.2</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Ramo con Mejor Nota:</span>
+                        <span>Historia - 6.5</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Ramo con Más Evaluaciones:</span>
+                        <span>Matemáticas - 5 evaluaciones</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total de Ramos:</span>
+                        <span>5 ramos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="notion-info">
+            <h3><i class="fab fa-notion"></i> ¿Cómo usar en Notion?</h3>
+            <p>Puedes incorporar esta aplicación a tu página de Notion usando la opción de embed</p>
+            
+            <div class="instructions">
+                <ol>
+                    <li>En tu página de Notion, escribe <code>/embed</code> y selecciona la opción "Embed"</li>
+                    <li>Copia la URL completa de esta página y pégala en el campo de embed de Notion</li>
+                    <li>Ajusta el tamaño del embed según tus preferencias</li>
+                    <li>¡Listo! Ahora tendrás tu gestor de notas dentro de Notion</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Datos de ejemplo
+            const coursesData = [
+                { name: 'Matemáticas', grades: [
+                    { grade: 5.6, weight: 30, date: '2023-04-15' },
+                    { grade: 6.2, weight: 30, date: '2023-05-20' },
+                    { grade: 4.8, weight: 40, date: '2023-06-10' }
+                ]},
+                { name: 'Historia', grades: [
+                    { grade: 6.5, weight: 40, date: '2023-04-18' },
+                    { grade: 6.0, weight: 60, date: '2023-05-22' }
+                ]},
+                { name: 'Ciencias', grades: [
+                    { grade: 5.0, weight: 25, date: '2023-04-20' },
+                    { grade: 4.5, weight: 25, date: '2023-05-15' },
+                    { grade: 5.5, weight: 25, date: '2023-05-30' },
+                    { grade: 6.0, weight: 25, date: '2023-06-05' }
+                ]}
+            ];
+            
+            // Cargar datos desde localStorage si existen
+            let courses = JSON.parse(localStorage.getItem('gradeCourses')) || coursesData;
+            
+            // Elementos de la interfaz
+            const coursesTable = document.getElementById('courses-table');
+            const gradesTable = document.getElementById('grades-table');
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Función para cambiar de pestaña
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Desactivar todas las pestañas
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    // Activar la pestaña seleccionada
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-content`).classList.add('active');
+                });
+            });
+            
+            // Función para calcular la nota final de un ramo
+            function calculateFinalGrade(grades) {
+                let totalWeight = 0;
+                let weightedSum = 0;
+                
+                grades.forEach(grade => {
+                    totalWeight += grade.weight;
+                    weightedSum += grade.grade * grade.weight;
+                });
+                
+                if (totalWeight === 0) return 0;
+                return (weightedSum / totalWeight).toFixed(1);
+            }
+            
+            // Función para renderizar la tabla de ramos
+            function renderCoursesTable() {
+                const tbody = coursesTable.querySelector('tbody');
+                tbody.innerHTML = '';
+                
+                courses.forEach((course, index) => {
+                    const finalGrade = calculateFinalGrade(course.grades);
+                    const totalWeight = course.grades.reduce((sum, grade) => sum + grade.weight, 0);
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${course.name}</td>
+                        <td>${finalGrade}</td>
+                        <td>${totalWeight}%</td>
+                        <td class="actions">
+                            <button class="view-grades" data-index="${index}"><i class="fas fa-eye"></i> Ver</button>
+                            <button class="delete delete-course" data-index="${index}"><i class="fas fa-trash"></i> Eliminar</button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+                
+                // Agregar event listeners a los botones
+                document.querySelectorAll('.view-grades').forEach(button => {
+                    button.addEventListener('click', () => {
+                        // Cambiar a la pestaña de notas
+                        tabs.forEach(t => t.classList.remove('active'));
+                        tabContents.forEach(tc => tc.classList.remove('active'));
+                        
+                        document.querySelector('[data-tab="grades"]').classList.add('active');
+                        document.getElementById('grades-content').classList.add('active');
+                    });
+                });
+                
+                document.querySelectorAll('.delete-course').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = this.getAttribute('data-index');
+                        courses.splice(index, 1);
+                        saveData();
+                        renderAllTables();
+                    });
+                });
+            }
+            
+            // Función para renderizar la tabla de todas las notas
+            function renderGradesTable() {
+                const tbody = gradesTable.querySelector('tbody');
+                tbody.innerHTML = '';
+                
+                courses.forEach((course, courseIndex) => {
+                    course.grades.forEach((grade, gradeIndex) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${course.name}</td>
+                            <td>${grade.grade}</td>
+                            <td>${grade.weight}%</td>
+                            <td>${formatDate(grade.date)}</td>
+                            <td class="actions">
+                                <button class="delete delete-grade" data-course="${courseIndex}" data-grade="${gradeIndex}">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </td>
+                        `;
+                        
+                        tbody.appendChild(row);
+                    });
+                });
+                
+                // Agregar event listeners a los botones de eliminar
+                document.querySelectorAll('.delete-grade').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const courseIndex = this.getAttribute('data-course');
+                        const gradeIndex = this.getAttribute('data-grade');
+                        
+                        courses[courseIndex].grades.splice(gradeIndex, 1);
+                        
+                        // Si no quedan notas, eliminar el ramo
+                        if (courses[courseIndex].grades.length === 0) {
+                            courses.splice(courseIndex, 1);
+                        }
+                        
+                        saveData();
+                        renderAllTables();
+                    });
+                });
+            }
+            
+            // Función para formatear fechas
+            function formatDate(dateString) {
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString('es-ES', options);
+            }
+            
+            // Función para guardar datos en localStorage
+            function saveData() {
+                localStorage.setItem('gradeCourses', JSON.stringify(courses));
+            }
+            
+            // Función para renderizar todas las tablas
+            function renderAllTables() {
+                renderCoursesTable();
+                renderGradesTable();
+            }
+            
+            // Agregar event listener al botón de agregar nota
+            document.getElementById('add-grade').addEventListener('click', function() {
+                const nameInput = document.getElementById('course-name');
+                const gradeInput = document.getElementById('course-grade');
+                const weightInput = document.getElementById('course-weight');
+                const dateInput = document.getElementById('course-date');
+                
+                const name = nameInput.value.trim();
+                const grade = parseFloat(gradeInput.value);
+                const weight = parseInt(weightInput.value);
+                const date = dateInput.value;
+                
+                // Validaciones
+                if (!name || isNaN(grade) || isNaN(weight) || !date) {
+                    alert('Por favor, completa todos los campos correctamente.');
+                    return;
+                }
+                
+                if (grade < 1 || grade > 7) {
+                    alert('La nota debe estar entre 1.0 y 7.0');
+                    return;
+                }
+                
+                if (weight < 1 || weight > 100) {
+                    alert('La ponderación debe estar entre 1% y 100%');
+                    return;
+                }
+                
+                // Buscar si el ramo ya existe
+                let courseIndex = courses.findIndex(course => course.name.toLowerCase() === name.toLowerCase());
+                
+                if (courseIndex === -1) {
+                    // Crear nuevo ramo
+                    courses.push({
+                        name: name,
+                        grades: [{ grade, weight, date }]
+                    });
+                } else {
+                    // Agregar nota al ramo existente
+                    courses[courseIndex].grades.push({ grade, weight, date });
+                }
+                
+                // Guardar y actualizar
+                saveData();
+                renderAllTables();
+                
+                // Limpiar campos
+                nameInput.value = '';
+                gradeInput.value = '';
+                weightInput.value = '';
+                dateInput.value = '';
+                
+                // Enfocar en el campo de nombre
+                nameInput.focus();
+            });
+            
+            // Inicializar la aplicación
+            renderAllTables();
+            
+            // Establecer la fecha de hoy por defecto
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('course-date').value = today;
+        });
+    </script>
+</body>
+</html>
